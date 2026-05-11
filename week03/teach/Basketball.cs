@@ -23,14 +23,43 @@ public class Basketball
         reader.TextFieldType = FieldType.Delimited;
         reader.SetDelimiters(",");
         reader.ReadFields(); // ignore header row
-        while (!reader.EndOfData) {
+        while (!reader.EndOfData)
+        {
             var fields = reader.ReadFields()!;
             var playerId = fields[0];
             var points = int.Parse(fields[8]);
+
+            if (players.ContainsKey(playerId))
+                players[playerId] += points;
+            else
+                players[playerId] = points;
         }
 
-        Console.WriteLine($"Players: {{{string.Join(", ", players)}}}");
+        // Console.WriteLine($"Players: {{{string.Join(", ", players)}}}");
 
-        var topPlayers = new string[10];
+        var top10Heap = new PriorityQueue<string, int>();
+
+        foreach (var player in players)
+        {
+            top10Heap.Enqueue(player.Key, player.Value);
+
+            if (top10Heap.Count > 10)
+            {
+                top10Heap.Dequeue();
+            }
+        }
+
+        var reverseOrder = new Stack<(string Key, int Value)>();
+
+        while (top10Heap.Count > 0)
+        {
+            top10Heap.TryDequeue(out string key, out int value);
+            reverseOrder.Push((key, value));
+        }
+
+        foreach (var (key, value) in reverseOrder)
+        {
+            Console.WriteLine($"{key}: {value}");
+        }
     }
 }
